@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: react-express-mongodb
+  labels:
+    name: react-express-mongodb
+    environment: production

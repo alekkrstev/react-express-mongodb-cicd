@@ -6,10 +6,6 @@ on:
   pull_request:
     branches: [ main ]
 
-env:
-  DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
-  IMAGE_TAG: ${{ github.sha }}
-
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
@@ -31,23 +27,23 @@ jobs:
       uses: docker/build-push-action@v4
       with:
         context: ./backend
+        file: ./backend/Dockerfile
         push: true
+        no-cache: true
         tags: |
           ${{ secrets.DOCKERHUB_USERNAME }}/react-express-mongodb-backend:latest
           ${{ secrets.DOCKERHUB_USERNAME }}/react-express-mongodb-backend:${{ github.sha }}
-        cache-from: type=registry,ref=${{ secrets.DOCKERHUB_USERNAME }}/react-express-mongodb-backend:latest
-        cache-to: type=inline
 
     - name: Build and push Frontend image
       uses: docker/build-push-action@v4
       with:
         context: ./frontend
+        file: ./frontend/Dockerfile
         push: true
+        no-cache: true
         tags: |
           ${{ secrets.DOCKERHUB_USERNAME }}/react-express-mongodb-frontend:latest
           ${{ secrets.DOCKERHUB_USERNAME }}/react-express-mongodb-frontend:${{ github.sha }}
-        cache-from: type=registry,ref=${{ secrets.DOCKERHUB_USERNAME }}/react-express-mongodb-frontend:latest
-        cache-to: type=inline
 
   deploy:
     needs: build-and-push
@@ -55,9 +51,6 @@ jobs:
     if: github.ref == 'refs/heads/main'
     
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v3
-      
     - name: Deploy notification
       run: |
         echo "🚀 New images pushed to DockerHub!"
